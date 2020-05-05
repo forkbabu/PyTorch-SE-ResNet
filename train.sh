@@ -1,7 +1,5 @@
-python train.py --trainroot /home/stick/Dataset/place365/train.txt\
-    --valroot /home/stick/Dataset/place365/val.txt\
-    --num_classes 365\
-    --batch_size 64\
+!python train.py \
+    --num_classes 10\
+    --batch_size 16\
     --displayInterval 200\
-    --resume_path weights/seresnet101_best.pth.tar\
-    --gpu 0,1
+    --gpu 0
