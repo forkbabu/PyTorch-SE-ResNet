@@ -5,9 +5,9 @@ import torch.nn as nn
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torchvision.transforms as transforms
-
+import torchvision.datasets as datasets
 import model as modelZoo
-from utils import ImageData
+
 import utils
 
 import os
@@ -18,12 +18,10 @@ import argparse
 model_names = ['se_resnet50', 'se_resnet101', 'se_resnet152', 'se_resnext50', 'se_resnext101', 'se_resnext152']
 
 parser = argparse.ArgumentParser(description='PyTorch SE-ResNet Training')
-parser.add_argument('--arch', '-a', metavar='ARCH', default='se_resnet101',
+parser.add_argument('--arch', '-a', metavar='ARCH', default='se_resnet50',
                     help='model architecture: ' +
                         ' | '.join(model_names) +
-                        ' (default: se_resnet101)')
-parser.add_argument('--trainroot', required=True, help='path to train dataset (images list file)')
-parser.add_argument('--valroot', required=True, help='path to val dataset (images list file)')
+                        ' (default: se_resnet50)')
 parser.add_argument('--lr', default=0.01, type=float,
                     help='learning rate for training')
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
@@ -44,8 +42,6 @@ parser.add_argument('--gpu', type=str, default='0',
                     help='ID of GPUs to use, eg. 1,3')
 parser.add_argument('--model_path', type=str, default='weights',
                     help='model file to save')
-parser.add_argument('--resume_path', type=str, default=None,
-                    help='model file to resume to train')
 parser.add_argument('--num_classes', type=int, default=365,
                     help='model file to resume to train')
 parser.add_argument('--displayInterval', type=int,
@@ -71,13 +67,8 @@ model = torch.nn.DataParallel(model, device_ids=gpus).cuda()
 
 cudnn.benchmark = True
 
-if args.resume_path is not None:
-    pretrained_model = torch.load(args.resume_path)
-    model.load_state_dict(pretrained_model['state_dict'])
-    best_prec1 = pretrained_model['best_prec1']
-    print('Load resume model done.')
-else:
-    best_prec1 = 0
+
+best_prec1 = 0
 print('Best top-1: {:.4f}'.format(best_prec1))
 
 # Data
@@ -85,22 +76,22 @@ normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225])
 
 train_loader = torch.utils.data.DataLoader(
-    ImageData(args.trainroot, transforms.Compose([
-        transforms.RandomSizedCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        normalize,
-    ])),
+    datasets.CIFAR10(root='./data', train=True, transform=transforms.Compose([
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(32, 4),
+            #transforms.Resize((32, 32)),
+            transforms.ToTensor(),
+            #normalize,
+        ]), download=True),
     batch_size=args.batch_size, shuffle=True,
     num_workers=args.workers, pin_memory=True)
 
 val_loader = torch.utils.data.DataLoader(
-    ImageData(args.valroot, transforms.Compose([
-        transforms.Scale(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        normalize,
-    ])),
+    datasets.CIFAR10(root='./data', train=False, transform=transforms.Compose([
+            #transforms.Resize((32, 32)),
+            transforms.ToTensor(),
+            #normalize,
+        ])),
     batch_size=args.batch_size, shuffle=False,
     num_workers=args.workers, pin_memory=True)
 
@@ -136,9 +127,9 @@ def train(train_loader, model, criterion, optimizer, epoch, lr_cur):
 
         # measure utils.accuracy and record loss
         prec1, prec3 = utils.accuracy(output.data, target, topk=(1, 3))
-        losses.update(loss.data[0], input.size(0))
-        top1.update(prec1[0], input.size(0))
-        top3.update(prec3[0], input.size(0))
+        losses.update(loss.item(), input.size(0))
+        top1.update(prec1.item(), input.size(0))
+        top3.update(prec3.item(), input.size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
