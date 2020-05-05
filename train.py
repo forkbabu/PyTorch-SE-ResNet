@@ -117,7 +117,7 @@ def train(train_loader, model, criterion, optimizer, epoch, lr_cur):
 
     for i, (input, target) in enumerate(train_loader):
 
-        target = target.cuda(gpus[0], async=True)
+        target = target.cuda()
         # print target
         input_var = torch.autograd.Variable(input)
         target_var = torch.autograd.Variable(target)
@@ -164,9 +164,9 @@ def validate(val_loader, model, criterion):
 
         # measure utils.accuracy and record loss
         prec1, prec3 = utils.accuracy(output.data, target, topk=(1, 3))
-        losses.update(loss.data[0], input.size(0))
-        top1.update(prec1[0], input.size(0))
-        top3.update(prec3[0], input.size(0))
+        losses.update(loss.item(), input.size(0))
+        top1.update(prec1.item(), input.size(0))
+        top3.update(prec3.item(), input.size(0))
 
         if (i+1) % args.displayInterval == 0:
             print('Test: [{0}/{1}]\t'
