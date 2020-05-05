@@ -151,32 +151,34 @@ def validate(val_loader, model, criterion):
     top3 = utils.AverageMeter()
 
     # switch to evaluate mode
-    model.eval()
+    
+    with torch.no_grad():
 
-    for i, (input, target) in enumerate(val_loader):
-        target = target.cuda(gpus[0], async=True)
-        input_var = torch.autograd.Variable(input, volatile=True)
-        target_var = torch.autograd.Variable(target, volatile=True)
+      for i, (input, target) in enumerate(val_loader):
 
-        # compute output
-        output = model(input_var)
-        loss = criterion(output, target_var)
+          target = target.cuda()
+          input_var = torch.autograd.Variable(input)
+          target_var = torch.autograd.Variable(target)
+          model.eval()
+          # compute output
+          output = model(input_var)
+          loss = criterion(output, target_var)
 
-        # measure utils.accuracy and record loss
-        prec1, prec3 = utils.accuracy(output.data, target, topk=(1, 3))
-        losses.update(loss.item(), input.size(0))
-        top1.update(prec1.item(), input.size(0))
-        top3.update(prec3.item(), input.size(0))
+          # measure utils.accuracy and record loss
+          prec1, prec3 = utils.accuracy(output.data, target, topk=(1, 3))
+          losses.update(loss.item(), input.size(0))
+          top1.update(prec1.item(), input.size(0))
+          top3.update(prec3.item(), input.size(0))
 
-        if (i+1) % args.displayInterval == 0:
-            print('Test: [{0}/{1}]\t'
-                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
-                  'Prec@3 {top3.val:.3f} ({top3.avg:.3f})'.format(
-                      i, len(val_loader), loss=losses, top1=top1, top3=top3))
+          if (i+1) % args.displayInterval == 0:
+              print('Test: [{0}/{1}]\t'
+                    'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+                    'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
+                    'Prec@3 {top3.val:.3f} ({top3.avg:.3f})'.format(
+                        i, len(val_loader), loss=losses, top1=top1, top3=top3))
 
-    print(' * Prec@1 {top1.avg:.3f} Prec@3 {top3.avg:.3f}'
-          .format(top1=top1, top3=top3))
+      print(' * Prec@1 {top1.avg:.3f} Prec@3 {top3.avg:.3f}'
+            .format(top1=top1, top3=top3))
 
     return top1.avg
 
