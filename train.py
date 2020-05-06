@@ -64,6 +64,8 @@ else:
     model = Net(num_classes=args.num_classes)
 
 model = torch.nn.DataParallel(model, device_ids=gpus).cuda()
+from torchsummary import summary
+print(summary(model,(3,32,32)))
 
 cudnn.benchmark = True
 
