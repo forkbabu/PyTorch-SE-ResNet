@@ -103,7 +103,7 @@ class SKAttention(nn.Module):
         self.conv_ex = nn.Sequential(nn.Conv2d(channel//reduction, channel, 1, padding=0, bias=True))
         self.softmax = nn.Softmax(dim=1)
     def forward(self, x):
-        print(x.shape)
+        
         conv1 = self.dilation(x).unsqueeze(dim=1)
         conv2 = self.erosion(x).unsqueeze(dim=1)
         features = torch.cat([conv1, conv2], dim=1)
