@@ -93,8 +93,8 @@ class SKAttention(nn.Module):
         super(SKAttention, self).__init__()
         #self.conv1 = nn.Conv2d(channel, channel, 3, padding=1, bias=True) # dilation
         #self.conv2 = nn.Conv2d(channel, channel, 3, padding=2, dilation=2, bias=True) # erosion
-        self.dilation = Dilation2d(channel,channel,3)
-        self.erosion = Erosion2d(channel,channel,3)
+        self.dilation = Dilation2d(channel,channel,3,False)
+        self.erosion = Erosion2d(channel,channel,3,False)
         self.pool = nn.AdaptiveAvgPool2d(1)
         self.conv_se = nn.Sequential(
             nn.Conv2d(channel, channel//reduction, 1, padding=0, bias=True),
