@@ -71,11 +71,11 @@ class Morphology(nn.Module):
         return x 
 
 class Dilation2d(Morphology):
-    def __init__(self, in_channels, out_channels, kernel_size=5, soft_max=True, beta=20):
+    def __init__(self, in_channels, out_channels, kernel_size=5, soft_max=True, beta=5):
         super(Dilation2d, self).__init__(in_channels, out_channels, kernel_size, soft_max, beta, 'dilation2d')
 
 class Erosion2d(Morphology):
-    def __init__(self, in_channels, out_channels, kernel_size=5, soft_max=True, beta=20):
+    def __init__(self, in_channels, out_channels, kernel_size=5, soft_max=True, beta=5):
         super(Erosion2d, self).__init__(in_channels, out_channels, kernel_size, soft_max, beta, 'erosion2d')
 
 
@@ -103,6 +103,7 @@ class SKAttention(nn.Module):
         self.conv_ex = nn.Sequential(nn.Conv2d(channel//reduction, channel, 1, padding=0, bias=True))
         self.softmax = nn.Softmax(dim=1)
     def forward(self, x):
+        print(x.shape)
         conv1 = self.dilation(x).unsqueeze(dim=1)
         conv2 = self.erosion(x).unsqueeze(dim=1)
         features = torch.cat([conv1, conv2], dim=1)
