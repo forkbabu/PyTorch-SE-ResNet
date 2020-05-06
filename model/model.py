@@ -128,13 +128,7 @@ class Bottleneck(nn.Module):
         self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
         self.bn3 = nn.BatchNorm2d(planes * 4)
         self.relu = nn.ReLU(inplace=True)
-        # SE
-        self.global_pool = nn.AdaptiveAvgPool2d(1)
-        self.conv_down = nn.Conv2d(
-            planes * 4, planes // 4, kernel_size=1, bias=False)
-        self.conv_up = nn.Conv2d(
-            planes // 4, planes * 4, kernel_size=1, bias=False)
-        self.sig = nn.Sigmoid()
+        
         # Downsample
         self.downsample = downsample
         self.stride = stride
