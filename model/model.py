@@ -104,8 +104,8 @@ class SKAttention(nn.Module):
         self.softmax = nn.Softmax(dim=1)
     def forward(self, x):
         
-        conv1 = self.erosion(dilation(x)).unsqueeze(dim=1)
-        conv2 = self.dilation(erosion(x)).unsqueeze(dim=1)
+        conv1 = self.erosion(self.dilation(x)).unsqueeze(dim=1)
+        conv2 = self.dilation(self.erosion(x)).unsqueeze(dim=1)
         features = torch.cat([conv1, conv2], dim=1)
         U = torch.sum(features, dim=1)
         S = self.pool(U)
