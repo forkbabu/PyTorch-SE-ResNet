@@ -116,6 +116,7 @@ class SKAttention(nn.Module):
         return V
     
 class Bottleneck(nn.Module):
+    expansion=2
     
 
     def __init__(self, inplanes, planes, stride=1, downsample=None):
