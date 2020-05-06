@@ -116,7 +116,7 @@ class SKAttention(nn.Module):
         return V
     
 class Bottleneck(nn.Module):
-    expansion = 4
+    
 
     def __init__(self, inplanes, planes, stride=1, downsample=None):
         super(Bottleneck, self).__init__()
@@ -135,7 +135,6 @@ class Bottleneck(nn.Module):
         self.SKAttention = SKAttention(planes*2,reduction=planes)
     def forward(self, X):
         
-
         out = self.conv1(X)
         out = self.bn1(out)
         out = self.relu(out)
